@@ -14,9 +14,9 @@ Linck, E., Hanna, Z., Sellas, A., Dumbacher, J. In prep. Evaluating hybridizatio
 
 **Script:** syma_pca.R  
 **Description:** PCA / DAPC analysis of 100% complete SNP matrix implemented in adegenet  
-**Notes:** Requires dapcplot.R. Data: elinck/hyRAD/data/syma_pca.R  
+**Notes:** Requires dapcplot.R. Data: elinck/hyRAD/data/snps_extended_adg  
 
-### Statistical Analysis
+### Statistical analysis
 
 **Script:** hyrad_performance.R  
 **Description:** Basic statistical analyses of hyRAD's sequencing and assembly performance as relates to various input DNA variables.   
