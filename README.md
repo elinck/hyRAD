@@ -12,7 +12,7 @@ Linck, E., Hanna, Z., Sellas, A., Dumbacher, J. In prep. Evaluating hybridizatio
 
 **Script:** cutcontigs.R  
 **Description:** Simple R function for removing specific contigs from a fasta file. Used to remove contigs matching mitochondrial DNA sequences and non-vertebrate BLAST search matches (e.g., contaminant DNA) from pseudo-reference genome.  
-**Notes:** Credit to R. Harris (https://github.com/rebzzy/) for the lapply() solution.  
+**Notes:** Credit to [R. Harris] (https://github.com/rebzzy/) for the lapply() solution.  
 
 ### Population genetic analyses
 
