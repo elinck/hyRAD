@@ -4,6 +4,7 @@
 # developed w/ Zach Hanna (https://github.com/calacademy-research              #
 ################################################################################
 
+#!/bin/bash
 # requires: pyrad, perl, samtools, bedtools blastn, angsd, QB3 denovoTargetCapturePopGen scripts (https://github.com/CGRL-QB3-UCBerkeley/denovoTargetCapturePopGen.git)
 
 ########################################
