@@ -4,11 +4,15 @@ Working repository for analysis of *S. torotoro* hyRAD data associated with the 
 
 Linck, E., Hanna, Z., Sellas, A., Dumbacher, J. In prep. Evaluating hybridization capture with RAD probes as a tool for museum genomics with historical bird specimens. 
 
-### Bioinformatics pipeline
+### Bioinformatics
 
 **Script:** syma_hyRAD_bioinformatics.sh  
 **Description:** Shell commands for sequence data manipulation running QB3's [denovoTargetCapturePopGen wrapper scripts](https://github.com/CGRL-QB3-UCBerkeley/denovoTargetCapturePopGen), and running external bioinformatics tools (e.g., samtools)   
 **Notes:** Don't try and execute this, obviously. Data stored at NCBI's SRA (### pending); Dryad (### pending). 
+
+**Script:** cutcontigs.R  
+**Description:** Simple R function for removing specific contigs from a fasta file. Used to remove contigs matching mitochondrial DNA sequences and non-vertebrate BLAST search matches (e.g., contaminant DNA) from pseudo-reference genome.  
+**Notes:** Credit to R. Harris (https://github.com/rebzzy/) for the lapply() solution.  
 
 ### Population genetic analyses
 
