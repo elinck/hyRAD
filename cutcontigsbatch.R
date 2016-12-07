@@ -14,7 +14,7 @@ cutcontigsbatch <- function(directory, contigs){
       grep(pattern, fasta)
     }))
     toGrab <- sort(c(matchingLines, matchingLines + 1))
-    print(fasta[-toGrab])
+    print(fasta[toGrab])
     write(fasta[-toGrab],file=paste("cleaned_",i,sep=""))
     }
   }
