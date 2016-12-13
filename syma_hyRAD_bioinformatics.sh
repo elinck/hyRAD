@@ -4,7 +4,6 @@
 # developed w/ Zach Hanna (https://github.com/calacademy-research              #
 ################################################################################
 
-#!/bin/bash
 # requires: pyrad, perl, samtools, bedtools blastn, angsd, QB3 denovoTargetCapturePopGen scripts (https://github.com/CGRL-QB3-UCBerkeley/denovoTargetCapturePopGen.git)
 
 ########################################
@@ -44,7 +43,7 @@ cp -r /data/zhanna/bin/denovoTargetCapturePhylogenomics/ecoli/ /data/elinck/syma
 # run 1-ScrubReads_a
 perl /data/elinck/syma_assembly/1-ScrubReads_a cleanPE -t /home/elinck/bin/Trimmomatic0.36/trimmomatic-0.36.jar -f /data/elinck/syma_assembly/pipeline_07212016/raw/ -k 12 -z -c /data/elinck/syma_assembly/pipeline_07212016/ecoli/e_coli_K12.fasta -o /data/elinck/syma_assembly/pipeline_07212016/cleaned/ 1>/data/elinck/syma_assembly/pipeline_07212016/2016Jul21_scrubreads_run1.log 2>/data/elinck/2016Jul21_scrubreads_run1.err
 
-#how many duplicates?
+# how many duplicates reads?
 cat *.fq | echo $((`wc -l`/4)) > reads_original.txt
 
 cat *.fq | echo $((`wc -l`/4)) > reads_precelean.txt
@@ -64,7 +63,7 @@ perl /data/elinck/syma_assembly/2-GenerateAssembliesPhylo spades -reads /data/el
 # Finding Targets        #
 ##########################
 
-#make directories to find targets separately by sample type (modern or ancient)
+# make directories to find targets separately by sample type (modern or ancient)
 mkdir /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference
 
 mkdir /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient
@@ -85,44 +84,54 @@ blastdbcmd -db /data/elinck/syma_assembly/probes/clust.97/t_ochr_29.consens -ent
 
 perl /data/elinck/syma_assembly/3-FindingTargetsV8 combineExon -t /data/elinck/syma_assembly/probes/clust.97/rad_probe_unique.fasta -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference -p 0.95 -b 1 -e 4 l
 
-perl 3-FindingTargetsV8 combineExon -t /data/elinck/syma_assembly/probes/clust.97/rad_probe_unique.fasta -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient -p 0.95 -b 1 -e 4
+perl /data/elinck/syma_assembly/3-FindingTargetsV8 combineExon -t /data/elinck/syma_assembly/probes/clust.97/rad_probe_unique.fasta -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient -p 0.95 -b 1 -e 4
 
 # how many captured sequences?
 grep ">" -c *.fa
 
-##########################
-# Evaluate Assemblies    #
-##########################
+##################################
+# Evaluate and clean Assemblies  #
+##################################
 
-#abyss  assembly stats evaluator (not used)
+# find mtDNA seqs in assemblies
+for i in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/fasta/*.fasta; do blastn -db /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/t_sanctus_ref.fasta -query $i -evalue 0.00001 -outfmt 6 -out ${i}_mtDNAhits.txt; done
+
+for i in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/premasked/test/*.fasta; do blastn -db /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/t_sanctus_ref.fasta -query $i -evalue 0.00001 -outfmt 6 -out ${i}_mtDNAhits.txt; done
+
+# eliminate line breaks in fasta files for R treatment
+for i in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/intarget/.*fasta; do awk '/^>/ { print (NR==1 ? "" : RS) $0; next } { printf "%s", $0 } END { printf RS }' $i > ${i}_oneline; done
+
+# run functions in extractcontigIDs.R and cutcontigsbatch.R to remove mtDNA contaminant assemblies
+
+# abyss  assembly stats evaluator (not used)
 for i in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/*fasta; do abyss-fac $i; echo $i; done > readcounts.txt;
 
-##historic samples, in target regions
+## historic samples, in target regions
 
-#rename files in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/
+# rename files in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/
 find -type f -name "EL_hyRAD*" -exec rename 's/.intargetPremasked.fa/.fasta/' \{\} \;
 
-#assembly eval 
-perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/premasked
+# assembly eval
+perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/premasked/test/
 
 ## historic samples, all assembled regions 
 
-#rename files /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/original/
+# rename files /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/original/
 find -type f -name "EL_hyRAD*" -exec rename 's/.fasta.original/.fasta/' \{\} \;
 
-#assemby eval 
+# assemby eval 
 perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/original
 
 ## modern samples, in target regions
 find -type f -name "EL_hyRAD*" -exec rename 's/.intargetPremasked.fa/.fasta/' \{\} \;
 
-#assembly eval 
-perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/premasked
+# assembly eval 
+perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/premasked/test/eval/
 
 ## modern samples, all assembled regions
 find -type f -name "EL_hyRAD*" -exec rename 's/.fasta.original/.fasta/' \{\} \;
 
-#assembly eval 
+# assembly eval 
 perl /data/elinck/syma_assembly/AssemblyEvaluation BASIC -a /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/original
 
 #########################################
@@ -143,7 +152,7 @@ perl /home/elinck/bin/prinseq-lite-0.20.4/prinseq-lite.pl -fastq EL_hyRAD_001A_S
 # Blast reference genome for mtDNA contamination #
 ##################################################
 
-#upload t_sanctus_ref.fasta from desktop to /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/
+# upload t_sanctus_ref.fasta from desktop to /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/
 
 # make a blast database from published kingfisher mtDNA (Todiramphus sanctus)
 makeblastdb -in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/t_sanctus_ref.fasta -parse_seqids -dbtype nucl
@@ -151,22 +160,24 @@ makeblastdb -in /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/refe
 # blast reference genome against kingfisher mtDNA blast database
 blastn -db t_sanctus_ref.fasta -query combined_targetedRegionAndFlanking.fasta -evalue 0.00001 -outfmt 6 -out mtDNA_in_reference_blast.txt
 
+# contigs blasting to  mtDNA: combined_Contig2441, combined_Contig70086
+
 ####################################################
 # Blast reference genome for nonvert contamination #
 ####################################################
 
-#blast reference genome against local blast nt database
-blastn -db ncbi_nt -query combined_targetedRegionAndFlanking.fasta -evalue 0.00001  -outfmt 6 -out nonvertcontamination_in_reference_blast.txt
+# blast reference genome against NCBI nt dastabase
+blastn -db nt -query combined_targetedRegionAndFlanking.fasta -outfmt 10 -num_alignments 5 -max_hsps 1 -out blast-output.m6
 
-#directions for further processing (run by Z. Hanna; may be updated w/ actual commands)
+# get non-vert hits
+GItaxidIsVert.py blast-output.m6 -n -a #Henderson, James B., Hanna, Zachary R. 2016. GItaxidIsVert. Version 1.0.0. DOI: 10.5281/zenodo.163737
 
-#output top five hits for each contig
+# pulled potentially contaminated scaffolds with bioawk version 1.0 (Li, 2013)
 
-#take subset that align to nonvert ref genomes
+# blasted pulled scaffolds
+blastn -db nt -query potential-nonVert-contigs.fasta -html -out blast-output.html
 
-#blast again
-
-#evaluate results, enter both mtDNA hit contig IDs and nonvert contig IDs in one row per ID text file, feed to cutcontigs.R (see README.md)
+# contigs w/ first or only blast hit as nonvert: combined_Contig118715, combined_Contig131378, combined_Contig136283, combined_Contig150008, combined_Contig30796, combined_Contig52365, combined_Contig58599, combined_Contig73564
 
 ##########################
 # Alignment              #
@@ -177,10 +188,11 @@ mkdir /data/elinck/syma_assembly/pipeline_07212016/alignment
 # align to extended reference genome
 perl 5-Alignment -f /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -r /data/elinck/syma_assembly/pipeline_07212016/cleaned -o /data/elinck/syma_assembly/pipeline_07212016/alignment -i 235 -v 24 -l -t 90 -P /home/elinck/bin/picard-tools-2.4.1/picard.jar -G /home/elinck/bin/GenomeAnalysisTK-3.6/GenomeAnalysisTK.jar -p 16
 
-#evaluate exon capture performance (not working)
-perl /data/elinck/syma_assembly/6-ExonCaptureEvaluation Evaluation -genome /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -cleanDir /data/elinck/syma_assembly/pipeline_07212016/cleaned -rawDir /data/elinck/syma_assembly/pipeline_07212016/raw/pre-clean -bamDir /data/elinck/syma_assembly/pipeline_07212016/alignment -InstrID HS -readLen 100 -resDir /data/elinck/syma_assembly/pipeline_07212016/evaluation_20160808 -bedFile /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/Final/combined_targetedRegionforExonCapEval.bed 1>/data/elinck/syma_assembly/20160808_eval1.log 2>/data/elinck/syma_assembly/20160808_eval1.err
+# align to extended reference genome
+perl /data/elinck/syma_assembly/5-Alignment -f /data/elinck/syma_assembly/pipeline_07212016/alignment/cleaned/pseudo_ref_genome_cleaned.fa -r /data/elinck/syma_assembly/pipeline_07212016/cleaned -o /data/elinck/syma_assembly/pipeline_07212016/alignment/cleaned -i 235 -v 24 -l -t 90 -P /home/elinck/bin/picard-tools-2.4.1/picard.jar -G /home/elinck/bin/GenomeAnalysisTK-3.6/GenomeAnalysisTK.jar -p 24
 
-# subtract preclean from original, tk
+# evaluate exon capture performance (not working)
+perl /data/elinck/syma_assembly/6-ExonCaptureEvaluation Evaluation -genome /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -cleanDir /data/elinck/syma_assembly/pipeline_07212016/cleaned -rawDir /data/elinck/syma_assembly/pipeline_07212016/raw/pre-clean -bamDir /data/elinck/syma_assembly/pipeline_07212016/alignment -InstrID HS -readLen 100 -resDir /data/elinck/syma_assembly/pipeline_07212016/evaluation_20160808 -bedFile /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/ancient/In_target/Final/combined_targetedRegionforExonCapEval.bed 1>/data/elinck/syma_assembly/20160808_eval1.log 2>/data/elinck/syma_assembly/20160808_eval1.err
 
 # determine specificity per sample 
 for bam_file in *.bam
@@ -206,7 +218,7 @@ mkdir /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/
 mkdir /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/historic
 mkdir /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern
 
-#move bams to subfolders
+# move bams to subfolders
 mv EL_hyRAD_001A* EL_hyRAD_001B* EL_hyRAD_001C* EL_hyRAD_001D* EL_hyRAD_001E EL_hyRAD_001F* ./modern
 mv EL_hyRAD* ./historic
 
@@ -235,51 +247,77 @@ perl /data/elinck/syma_assembly/9-preFiltering percentile -b /data/elinck/syma_a
 
 perl /data/elinck/syma_assembly/9-preFiltering percentile -b /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/merged/merge_sorted.bam -o s_toro_modern
 
-#make historic vcf
-samtools mpileup -B -D -I -S -uf /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/historic/*sorted.bam | bcftools view -cg - > raw_historic_extended.vcf
+# make historic vcf
+samtools mpileup -B -D -I -S -uf /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/historic/*sorted.bam | bcftools view -cg - > raw_historic.vcf
 
-#make modern vcf
-samtools mpileup -B -D -I -S -uf /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/*sorted.bam | bcftools view -cg - > raw_modern_extended.vcf
+# make modern vcf
+samtools mpileup -B -D -I -S -uf /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/*sorted.bam | bcftools view -cg - > raw_modern.vcf
 
-#SNP cleaning historic
-perl /data/elinck/syma_assembly/10-SNPcleaner.pl -A /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -M CT_GA -d 5 -k 7 -u 3 -a 0 -r /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/historic/s_toro_gene_depth_percentile.txt -B syma_torotoro_historic.bed  -p syma_torotoro_dropped_historic -v /data/elinck/syma_assembly/pipeline_07212016/SNPs/raw_historic_extended.vcf > out_historic_cleaned.vcf
+# remove contaminant contigs from historic vcf
+vcftools --vcf raw_historic_extended.vcf --not-chr combined_Contig2441 --not-chr combined_Contig70086 --not-chr combined_Contig118715 --not-chr combined_Contig131378 --not-chr combined_Contig136283 --not-chr combined_Contig150008 --not-chr combined_Contig30796 --not-chr combined_Contig52365 --not-chr combined_Contig58599 --not-chr combined_Contig73564 --remove-indels --recode --recode-INFO-all --out historic_nocontam_nomito
 
-#SNP cleaning modern 
-perl /data/elinck/syma_assembly/10-SNPcleaner.pl -A /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -M CT_GA -d 5 -k 3 -u 3 -a 0 -r /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/s_toro_gene_depth_percentile.txt -B syma_torotoro_modern.bed  -p syma_torotoro_dropped_modern -v /data/elinck/syma_assembly/pipeline_07212016/SNPs/raw_modern_extended.vcf > out_modern_cleaned.vcf
+# remove contaminant contigs from modern vcf
+vcftools --vcf raw_modern_extended.vcf --not-chr combined_Contig2441 --not-chr combined_Contig70086 --not-chr combined_Contig118715 --not-chr combined_Contig131378 --not-chr combined_Contig136283 --not-chr combined_Contig150008 --not-chr combined_Contig30796 --not-chr combined_Contig52365 --not-chr combined_Contig58599 --not-chr combined_Contig73564 --remove-indels --recode --recode-INFO-all --out modern_nocontam_nomito
 
-#report count of alleles for all bed files
-wc -l /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/*/*.bed
+# SNP cleaning historic
+perl /data/elinck/syma_assembly/10-SNPcleaner.pl -A /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -M CT_GA -d 5 -k 7 -u 3 -a 0 -r /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/historic/s_toro_gene_depth_percentile.txt -B syma_torotoro_historic_cleaned.bed  -p syma_torotoro_dropped_historic -v /data/elinck/syma_assembly/pipeline_07212016/SNPs/historic_nocontam_nomito.recode.vcf > out_historic_nocontam.vcf
 
-#find shared sites among extended ref genome
-bedtools intersect -a /data/elinck/syma_assembly/pipeline_07212016/angsd/historic/syma_torotoro_historic.bed -b /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/syma_torotoro_modern.bed > /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/shared_sites.bed
+# SNP cleaning modern 
+perl /data/elinck/syma_assembly/10-SNPcleaner.pl -A /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -M CT_GA -d 5 -k 3 -u 3 -a 0 -r /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/modern/s_toro_gene_depth_percentile.txt -B syma_torotoro_modern_cleaned.bed  -p syma_torotoro_dropped_modern -v /data/elinck/syma_assembly/pipeline_07212016/SNPs/modern_nocontam_nomito.recode.vcf > out_modern_nocontam.vcf
 
-#make keep file for angsd
-cut -f 1,2 /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/shared_sites.bed  > shared_sites.keep
+# report count of alleles for all bed files
+wc -l /data/elinck/syma_assembly/pipeline_07212016/SNPs/*bed
 
-#index sites for angsd
-angsd sites index shared_sites.keep
+# find shared sites among extended ref genome
+bedtools intersect -a /data/elinck/syma_assembly/pipeline_07212016/SNPs/syma_torotoro_historic_cleaned.bed -b /data/elinck/syma_assembly/pipeline_07212016/SNPs/syma_torotoro_modern_cleaned.bed > /data/elinck/syma_assembly/pipeline_07212016/alignment/angsd/shared_sites_cleaned.bed
 
-#ANGSD, full data
-angsd -bam /data/elinck/syma_assembly/pipeline_07212016/angsd/bam.filelist.txt -sites /data/elinck/syma_assembly/pipeline_07212016/angsd/shared_sites.keep -anc /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -minQ 20 -fold 1 -out snps_extended  -GL 1  -doGeno 2  -doPost 1  -postCutoff 0.95 -doCounts 1 -doGlf 2 -geno_minDepth 6 -SNP_pval 0.05 -minMaf 0.0125 -doMaf 2 -doMajorMinor 1 -doSaf 1 -doPlink 2
+# make keep file for angsd
+cut -f 1,2 /data/elinck/syma_assembly/pipeline_07212016/SNPs/shared_sites_cleaned.bed  > shared_sites_cleaned.keep
 
-#ANGSD, no MD
-angsd -bam /data/elinck/syma_assembly/pipeline_07212016/angsd/bam.filelist.txt -sites /data/elinck/syma_assembly/pipeline_07212016/angsd/shared_sites.keep -anc /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -minQ 20 -fold 1 -out snps_extended_all  -GL 1  -doGeno 2  -doPost 1  -postCutoff 0.95 -doCounts 1 -doGlf 2 -geno_minDepth 6 -SNP_pval 0.05 -minMaf 0.0125 -doMaf 2 -doMajorMinor 1 -doSaf 1 -doPlink 2 -minInd 19
+# index sites for angsd
+angsd sites index shared_sites_cleaned.keep
 
-#report number of loci
+# run ANGSD, full data
+angsd -bam /data/elinck/syma_assembly/pipeline_07212016/SNPs/extended/bam.filelist.txt -sites /data/elinck/syma_assembly/pipeline_07212016/SNPs/shared_sites_cleaned.keep -anc /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -minQ 20 -fold 1 -out snps_cleaned_05 -GL 1  -doGeno 2  -doPost 1  -postCutoff 0.95 -doCounts 1 -doGlf 2 -geno_minDepth 6 -SNP_pval 0.05 -minMaf 0.05 -doMaf 2 -doMajorMinor 1 -doSaf 1 -doPlink 2
+
+# run ANGSD, no MD
+angsd -bam /data/elinck/syma_assembly/pipeline_07212016/SNPs/extended/bam.filelist.txt -sites /data/elinck/syma_assembly/pipeline_07212016/SNPs/shared_sites_cleaned.keep -anc /data/elinck/syma_assembly/pipeline_07212016/assemblies/raw/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -minQ 20 -fold 1 -out snps_cleaned_all_025  -GL 1  -doGeno 2  -doPost 1  -postCutoff 0.95 -doCounts 1 -doGlf 2 -geno_minDepth 6 -SNP_pval 0.05 -minMaf 0.025 -doMaf 2 -doMajorMinor 1 -doSaf 1 -doPlink 2 -minInd 19
+
+mkdir SNPcounts
+
+cd SNPcounts
+
+# obtain threader script
+git clone https://github.com/slager/threader.git
+
+# open threadme file
+nano threadme.txt
+
+# to count SNPs per missing individual individual req, copy above command 19 times, tweaking -minInd flag from 1-19, paste in threadme.txt
+
+# select 19 threads
+
+python threader.py
+
+gunzip *gz
+
+# report number of loci
 wc -l *geno 
 
-#output 100% complete matrix genind for adegenet
-perl /data/elinck/syma_assembly/11-PopGenTools Adegenet -g snps_extended.geno -n 19 -s 2750 -o snps_exended_adg
+cd ../
 
-#output full data matrix genind for adegenet
-perl /data/elinck/syma_assembly/11-PopGenTools Adegenet -g snps_extended_all.geno -n 19 -s 68545 -o snps_extended_all_adg
+# output 100% complete matrix genind for adegenet
+perl /data/elinck/syma_assembly/11-PopGenTools Adegenet -g snps_cleaned_all_05.geno -n 19 -s 1690 -o snps_cleaned_complete_maf05_adg
+
+# output full data matrix genind for adegenet
+perl /data/elinck/syma_assembly/11-PopGenTools Adegenet -g snps_cleaned.geno -n 19 -s 39105 -o snps_cleaned_all_adg
 
 #############################################
 # Downstream analyses (not reported in ms)  #
 #############################################
 
 # run NGSadmix on 75% matrix
-for i in 1 2 3 4 5 6 7 8 9 10; do NGSadmix -likes snps_15.beagle -K $i -P 4 -o ngsadmix_${i}_15 -minMaf 0.0125
+for i in 1 2 3 4 5 6 7 8 9 10; do NGSadmix -likes snps_15.beagle -K $i -P 4 -o ngsadmix_${i}_15 -minMaf 0.0125; done
 
 # run admixture on 75% matrix
 for K in 1 2 3 4 5 6 7 8 9 10; do admixture --cv hyrad_admixture.bed $K | tee log${K}.out; done
