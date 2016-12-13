@@ -1,11 +1,11 @@
-#setwd("~/Dropbox/Syma/")
+#setwd("~/Dropbox/Syma/hyRAD/")
 #install.packages("gridExtra"); install.packages("grid");install.packages("ggpmisc");install.packages("lme4");install.packages("AICcmodavg")
-#library(ggplot2);library(ggpmisc);library(plyr);library(dplyr);library(reshape2);library(gridExtra);library(grid);library(lme4);library(AICcmodavg)
+library(ggplot2);library(ggpmisc);library(plyr);library(dplyr);library(reshape2);library(gridExtra);library(grid);library(lme4);library(AICcmodavg)
 
 ### analyses exploring hyRAD's sequencing / assembly performance by various input DNA variables
 
 #read in assembly performance data, subset by extract type
-data <- read.csv("syma_torotoro_hyRAD_performance.csv")
+data <- read.csv("./data/syma_torotoro_hyRAD_performance.csv")
 modern <- subset(data, extract_type=="modern")
 historic <- subset(data, extract_type=="historic")
 
@@ -145,13 +145,13 @@ t.test(historic$missing_snps, modern$missing_snps)
 # AICc(mnl3) # selects mln3, significant
 
 # historic samples, drivers of number of loci on target
-hnl1 <- lm(num_loci_on_target ~ age + ng_uL_qubit + read_count_preclean, historic)
+hnl1 <- lm(num_loci_on_target ~ age + input_quantity + read_count_preclean, historic)
 summary(hnl1) 
 
-hnl2 <- lm(num_loci_on_target ~ ng_uL_qubit + read_count_preclean, historic)
+hnl2 <- lm(num_loci_on_target ~ input_quantity + read_count_preclean, historic)
 summary(hnl2)
 
-hnl3 <- lm(num_loci_on_target ~ ng_uL_qubit, historic)
+hnl3 <- lm(num_loci_on_target ~ read_count_preclean, historic)
 summary(hnl3)
 
 # corrected AIC (small sample size) to choose model
@@ -160,7 +160,7 @@ AICc(hnl2)
 AICc(hnl3)
 
 # plot sig. relationship between concentation, loci on target
-p6 <- ggplot(historic, aes(x=ng_uL_qubit, color=extract_type, y=num_loci_on_target)) + 
+p6 <- ggplot(historic, aes(x=read_count_preclean, color=extract_type, y=num_loci_on_target)) + 
   guides(color=FALSE) +
   geom_point() + 
   xlab("Read count") +
@@ -180,27 +180,27 @@ hmll3 <- lm(mean ~ read_count_preclean, historic)
 summary(hmll3) 
 
 #historical samples, gc content
-hgc1 <- lm(percent_gc_extended_ref ~ age + ng_uL_qubit + read_count_preclean, historic)
+hgc1 <- lm(percent_gc_extended_ref ~ age + input_quantity + read_count_preclean, historic)
 summary(hgc1)
 
-hgc2 <- lm(percent_gc_extended_ref ~ age + ng_uL_qubit, historic)
+hgc2 <- lm(percent_gc_extended_ref ~ age + input_quantity, historic)
 summary(hgc2)
 
-hgc3 <- lm(percent_gc_extended_ref ~ ng_uL_qubit, historic)
+hgc3 <- lm(percent_gc_extended_ref ~ input_quantity, historic)
 summary(hgc3)
 
 # plot sig. relationship between concentration, gc content in pseudo ref genome
-p7 <- ggplot(historic, aes(x=ng_uL_qubit, color=extract_type, y=percent_gc_extended_ref)) + 
+p7 <- ggplot(historic, aes(x=input_quantity, color=extract_type, y=percent_gc_extended_ref)) + 
   guides(color=FALSE) +
   geom_point() + 
-  xlab("Initial DNA concentration") +
+  xlab("Input DNA quantity (ng)") +
   ylab("Percent GC content") +
   theme(axis.title.y = element_text(size=12)) +
   theme(axis.title.x = element_text(size=12)) +
   stat_smooth(method="lm", fullrange=TRUE, alpha=0.1) 
 
 # explore num of loci on target, historic samples
-mh1 <- lm(num_loci_on_target ~ age + ng_uL_qubit + read_count_preclean, historic)
+mh1 <- lm(num_loci_on_target ~ age + input_quantity + read_count_preclean, historic)
 summary(mh1)
 
 mh2 <- lm(num_loci_on_target ~ age + read_count_preclean, historic)
@@ -210,17 +210,17 @@ mh3 <- lm(num_loci_on_target ~ read_count_preclean, historic)
 summary(mh3)
 
 # explore drivers of percent duplicate reads, historic samples
-hpd1 <- lm(percent_duplicates ~ age + ng_uL_qubit + read_count_preclean, historic)
+hpd1 <- lm(percent_duplicates ~ age + input_quantity + read_count_preclean, historic)
 summary(hpd1)
 
-hpd2 <- lm(percent_duplicates ~ age + ng_uL_qubit, historic)
+hpd2 <- lm(percent_duplicates ~ age + input_quantity, historic)
 summary(hpd2)
 
-hpd3 <- lm(percent_duplicates ~ ng_uL_qubit, historic)
+hpd3 <- lm(percent_duplicates ~ input_quantity, historic)
 summary(hpd3)
 
 # explore drivers of specificity, historic samples
-hsp1 <- lm(specificity_extended_ref ~ age + ng_uL_qubit + read_count_preclean, historic)
+hsp1 <- lm(specificity_extended_ref ~ age + input_quantity + read_count_preclean, historic)
 summary(hsp1)
 
 hsp2 <- lm(specificity_extended_ref ~ age + read_count_preclean, historic)
@@ -234,7 +234,7 @@ grid.arrange(p6,p7,ncol=2)
 
 # make dataframe number of SNPs by matrix completeness
 # entered manually because I'm lazy
-count <- c(68545,68485,68261,67790,66934,65494,62831,57109,49745,42574,36507,31596,27393,23582,19699,15648,11680,7350,2750)
+count <- c(39105,39073,38929,38642,38077,37167,35697,33159,29818,26392,23175,20278,17570,14935,12172,9401,6825,4196,1690)
 minInd <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
 snps <- as.data.frame(cbind(minInd,count))
 
