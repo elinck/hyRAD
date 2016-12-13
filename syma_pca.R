@@ -1,19 +1,19 @@
-#setwd("/Users/ethanlinck/Dropbox/Syma/")
+#setwd("/Users/ethanlinck/Dropbox/Syma/hyRAD")
 #install.packages("data.table");install.packages("ggplot2");install.packages("adegenet");install.packages("StAMPP");install.packages("data.table");install.packages("ggmap");install.packages("mapdata")
-#library(ggplot2);library(adegenet);library(reshape2);library(StAMPP);library(data.table);library(pegas);library(plyr);library(RColorBrewer);library(ggmap);library(mapdata);library(maps)
-#source("/Users/ethanlinck/Dropbox/Syma/hyRAD/dapcplot.R")
+library(ggplot2);library(adegenet);library(reshape2);library(StAMPP);library(data.table);library(pegas);library(plyr);library(RColorBrewer);library(ggmap);library(mapdata);library(maps)
+source("/Users/ethanlinck/Dropbox/Syma/hyRAD/dapcplot.R")
 
 ### PCA / DAPC analysis of population genetic structure in S. torotoro
 
 ### upload replicates of the same dataset for testing K1 - K8
-a <- read.delim("snps_extended_adg", sep="\t")
-b <- read.delim("snps_extended_adg", sep="\t")
-c <- read.delim("snps_extended_adg", sep="\t")
-d <- read.delim("snps_extended_adg", sep="\t")
-e <- read.delim("snps_extended_adg", sep="\t")
-f <- read.delim("snps_extended_adg", sep="\t")
-g <- read.delim("snps_extended_adg", sep="\t")
-h <- read.delim("snps_extended_adg", sep="\t")
+a <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+b <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+c <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+d <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+e <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+f <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+g <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
+h <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
 
 ### turn replicate datasets into genind files
 torotoro_a <- df2genind(a, NA.char="NA", ploidy=2, ncode=2)
@@ -27,21 +27,21 @@ torotoro_h <- df2genind(h, NA.char="NA", ploidy=2, ncode=2)
 
 ### identify sample names, putative pops (=subspecies)
 torotoro_a@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_a) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_a) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_b@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_b) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_b) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_c@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_c) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_c) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_14","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_d@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_d) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_d) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_e@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_e) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_e) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_f@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_f) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_f) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_g@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_g) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_g) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 torotoro_h@pop <- factor(c("pseuestes","pseuestes","meeki","pseuestes","meeki","torotoro","tentelare","pseuestes","pseuestes","torotoro","ochracea","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro","torotoro"))
-indNames(torotoro_h) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_toro_02", "t_ochr_03", "t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11","t_toro_14", "t_toro_15", "t_toro_18", "t_toro_19")
+indNames(torotoro_h) <- c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19")
 
 #pca plot
 scaled.data_a <- scaleGen(torotoro_a, NA.method = c("zero"))
@@ -108,11 +108,11 @@ p2 <- ggplot(data2, aes(x=names, y=gc, group=1)) +
   theme(axis.title.x = element_text(size=14))
 
 ###dapc w/max #PC's, then test for opt # to keep w/alpha scores
-temp_a <- dapc(torotoro_a, n.pca=6, n.da=2)
-opt.pc_a <- optim.a.score(temp_a) #5
+temp_a <- dapc(torotoro_a, n.pca=6, n.da=6)
+opt.pc_a <- optim.a.score(temp_a) #selects 6 PCAs
 
 ###find clusters w/o using pop priors
-clust_a <- find.clusters(torotoro_a, n.pca=6, n.clust=6, max.n.clust=18)
+clust_a <- find.clusters(torotoro_a, n.pca=6, n.clust=1, max.n.clust=18)
 clust_b <- find.clusters(torotoro_b, n.pca=6, n.clust=2, max.n.clust=18)
 clust_c <- find.clusters(torotoro_c, n.pca=6, n.clust=3, max.n.clust=18)
 clust_d <- find.clusters(torotoro_d, n.pca=6, n.clust=4, max.n.clust=18)
@@ -132,14 +132,14 @@ torotoro_g@pop <- clust_g$grp
 torotoro_h@pop <- clust_h$grp
 
 # run dapc for different cluster assignments K1-K8
-torotoro.dapc_a <- dapc(torotoro_a,n.pca=3,n.da=2)
-torotoro.dapc_b <- dapc(torotoro_b,n.pca=3,n.da=2)
-torotoro.dapc_c <- dapc(torotoro_c,n.pca=3,n.da=2)
-torotoro.dapc_d <- dapc(torotoro_d,n.pca=3,n.da=2)
-torotoro.dapc_e <- dapc(torotoro_e,n.pca=3,n.da=2)
-torotoro.dapc_f <- dapc(torotoro_f,n.pca=3,n.da=2)
-torotoro.dapc_g <- dapc(torotoro_g,n.pca=3,n.da=2)
-torotoro.dapc_h <- dapc(torotoro_h,n.pca=3,n.da=2)
+torotoro.dapc_a <- dapc(torotoro_a,n.pca=6,n.da=2)
+torotoro.dapc_b <- dapc(torotoro_b,n.pca=6,n.da=2)
+torotoro.dapc_c <- dapc(torotoro_c,n.pca=6,n.da=2)
+torotoro.dapc_d <- dapc(torotoro_d,n.pca=6,n.da=2)
+torotoro.dapc_e <- dapc(torotoro_e,n.pca=6,n.da=2)
+torotoro.dapc_f <- dapc(torotoro_f,n.pca=6,n.da=2)
+torotoro.dapc_g <- dapc(torotoro_g,n.pca=6,n.da=2)
+torotoro.dapc_h <- dapc(torotoro_h,n.pca=6,n.da=2)
 
 #identify majority pop membership visually
 compoplot(torotoro.dapc_a)
@@ -154,56 +154,53 @@ compoplot(torotoro.dapc_h)
 ###recode pops based on compoplot results
 pb <- c(1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2)
 pc <- c(1,1,1,1,1,1,2,2,2,3,3,3,3,3,3,3,3,3,3)
-pd <- c(1,1,1,1,1,1,2,2,2,3,3,3,3,3,3,4,3,3,3)
-pe <- c(1,1,1,1,1,1,2,2,2,3,5,3,3,3,3,4,3,3,3)
-pf <- c(1,1,1,1,1,1,2,2,2,3,5,6,3,3,3,4,3,3,3)
-pg <- c(1,1,1,1,7,7,2,2,2,3,5,6,3,3,3,4,3,3,3)
-ph <- c(1,1,1,1,7,7,8,2,2,3,5,6,3,3,3,4,3,3,3)
+pd <- c(1,1,1,1,1,1,2,2,2,4,3,3,3,3,3,3,3,3,3)
+pe <- c(1,1,1,1,1,1,2,2,2,4,5,3,3,3,3,3,3,3,3)
+pf <- c(1,1,1,1,6,6,2,2,2,4,5,3,3,3,3,3,3,3,3)
+
+
+#define colors
+set <- c("gold","forestgreen","magenta3","orangered","cornflowerblue","orange","sienna","dodgerblue4")
 
 #plot 
-dapcplot(torotoro.dapc_a,pa,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_b,pb,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_c,pc,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_d,pd,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_e,pe,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_f,pf,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_g,pg,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
-dapcplot(torotoro.dapc_h,ph,colors=c(brewer.pal(12,"Paired")),sort=FALSE)
+dapcplot(torotoro.dapc_b,pb,colors=set,sort=FALSE)
+dapcplot(torotoro.dapc_c,pc,colors=set,sort=FALSE)
+dapcplot(torotoro.dapc_d,pd,colors=set,sort=FALSE)
 
-#map k4
+#map k2
 localities <- read.csv("/Users/ethanlinck/Dropbox/Syma/figures/syma_localities.csv")
-cbind(localities,pc)
+localities1 <- cbind(localities,pb)
 map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
 ggplot() + coord_map()+
   geom_path(data=map, aes(x=long, y=lat, group=group)) +
-  geom_point(data=localities, size=5, aes(x=long, y=lat, col=as.factor(pc))) +
-  scale_colour_manual(values = c(brewer.pal(12,"Paired")),name="DAPC Cluster") +
+  geom_point(data=localities1, size=5, aes(x=long, y=lat, col=as.factor(pb))) +
+  scale_colour_manual(values = set,name="DAPC Cluster") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("Longitude") +
   ylab("Latitude") +
   guides(fill=guide_legend(title=NULL))
 
-#map k5
-localities2 <- cbind(localities,pd)
+#map k3
+localities2 <- cbind(localities,pc)
+map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
+ggplot() + coord_map()+
+  geom_path(data=map, aes(x=long, y=lat, group=group)) +
+  geom_point(data=localities2, size=5, aes(x=long, y=lat, col=as.factor(pc))) +
+  scale_colour_manual(values = set,name="DAPC Cluster") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  guides(fill=guide_legend(title=NULL))
+
+#map k4
+localities3 <- cbind(localities,pd)
 map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
 ggplot() + coord_map()+
   geom_path(data=map, aes(x=long, y=lat, group=group)) +
   geom_point(data=localities2, size=5, aes(x=long, y=lat, col=as.factor(pd))) +
-  scale_colour_manual(values = c(brewer.pal(12,"Paired")),name="DAPC Cluster") +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  xlab("Longitude") +
-  ylab("Latitude") +
-  guides(fill=guide_legend(title=NULL))
-
-#map k6
-localities3 <- cbind(localities,pe)
-map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
-ggplot() + coord_map()+
-  geom_path(data=map, aes(x=long, y=lat, group=group)) +
-  geom_point(data=localities2, size=5, aes(x=long, y=lat, col=as.factor(pe))) +
-  scale_colour_manual(values = c(brewer.pal(12,"Paired")),name="DAPC Cluster") +
+  scale_colour_manual(values = set,name="DAPC Cluster") +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   xlab("Longitude") +
@@ -211,11 +208,13 @@ ggplot() + coord_map()+
   guides(fill=guide_legend(title=NULL))
 
 ### mantel test for IBD
-z <- read.delim("snps_extended_adg", sep="\t")
+z <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
 torotoro_z <- df2genind(z, NA.char="NA", ploidy=2, ncode=2)
+torotoro_z@pop <- factor(c("t_pseu_31", "t_pseu_32", "t_meek_33", "t_pseu_34", "t_meek_26", "t_toro_36","t_tent_04", "t_pseu_12", "t_pseu_13", "t_ochr_03","t_toro_14","t_toro_02","t_toro_06", "t_toro_07", "t_toro_08", "t_toro_11", "t_toro_15", "t_toro_18", "t_toro_19"))
 toro <- genind2genpop(torotoro_z)
 xy <- cbind(localities$lat, localities$long)
 distxy <- dist(xy)
 distgen <- dist.genpop(toro,method=2)
-ibd <- mantel.randtest(distgen,distxy)
+ibd <- mantel.randtest(distgen,distxy) #not significant
+plot(ibd)
 
