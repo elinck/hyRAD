@@ -9,7 +9,15 @@ Linck, E., Hanna, Z., Sellas, A., Dumbacher, J. In prep. Evaluating hybridizatio
 **Script:** syma_hyRAD_bioinformatics.sh  
 **Description:** Shell commands for sequence data manipulation running QB3's [denovoTargetCapturePopGen wrapper scripts](https://github.com/CGRL-QB3-UCBerkeley/denovoTargetCapturePopGen), and running external bioinformatics tools (e.g., samtools)   
 **Notes:** Don't try and execute this, obviously. Data stored at NCBI's SRA (### pending); Dryad (### pending). 
-
+  
+&nbsp;
+  
+<p align="center">
+<img src="https://github.com/elinck/hyRAD/blob/master/figures/hyrad_bioinformatics_flowchart.png" width="500" height="621">
+</p>
+  
+&nbsp;
+  
 **Script:** extractcontigIDs.R  
 **Description:** R function for generating a list of contig or chromosome names from multiple tab-delimited (m6) BLAST search results in a directory. Used to identify all contigs in assemblies with mtDNA contamination and generate a text file for use in cutcontigs.R or cutcontigsbatch.R.   
 **Notes:** Will eventually modify for different BLAST formats. 
