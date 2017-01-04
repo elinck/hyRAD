@@ -1,6 +1,6 @@
 # hyRAD Bioinformatics Tutorial  
 
-This tutorial describes a bioinformatics pipeline for cleaning, assembling reads, and performaing variant discovery with hyRAD data, starting with raw Illumina fastq reads. Our pipeline is primarily based on Derek Eaton's pyRAD pipeline and Berkeley QB3's denovoTargetCapturePopGen wrapper scripts for handling target capture data.     
+This tutorial describes a bioinformatics pipeline for cleaning, assembling reads, and performaing variant discovery with hyRAD data, starting with raw Illumina fastq reads. Our pipeline is primarily based on [Derek Eaton's pyRAD pipeline](http://dereneaton.com/software/pyrad/) and [Berkeley CGRL QB3's denovoTargetCapture wrapper scripts](https://github.com/CGRL-QB3-UCBerkeley) for handling target capture data.     
 
 ## Getting Started
 
@@ -348,7 +348,7 @@ perl 11-PopGenTools Adegenet -g snps_cleaned.geno -n 20 -s 2000 -o snps_cleaned_
 Other conversions are similarly simple.
 
 ## Authorship
-[Ethan Linck](https://github.com/elinck/) and [Zach Hanna](https://github.com/calacademy-research) cobbled together this pipeline from a number of different tools. The QB3 denovoTargetCapture wrapper scripts were written by Ke Bi, Sonal Singhal, and Tyler Linderoth. Pyrad was written by Deren Eaton. Ethan Linck wrote this tutorial and converted it to markdown. 
+[Ethan Linck](https://github.com/elinck/) and [Zach Hanna](https://github.com/calacademy-research) cobbled together this pipeline from a number of different tools. The QB3 denovoTargetCapture wrapper scripts were written by Ke Bi, Sonal Singhal, and Tyler Linderoth. Pyrad was written by Deren Eaton. Authorship for samtools, vcftools, bedtools, Picard, GATK, and other required programs can be found on their home websites. Ethan Linck wrote this tutorial and converted it to a markdown document. 
 
 
 
