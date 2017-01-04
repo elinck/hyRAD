@@ -87,7 +87,11 @@ perl home/user/project/2-GenerateAssembliesPhylo spades -reads home/user/project
 
 ## Finding targets
 
-After generating your assemblies, it's time to determine which represent "on target" (or captured) loci in each sample. If you have both modern and historic samples (e.g., from museum specimens or other "ancient" DNA source), you'll want to run this step separately for each, as flanking regions to probe sequences will be merged to extend the pseudo-reference genome and only modern samples (presumably contaminant free) should be included. The "-p" flag selects a clustering threshhold -- we reccomend 0.95 -- while the "-b" flag should be set to 1 to merge modern DNA assemblies into probe sequences to extend the pseudo-reference genome. (We'll use this downstream for SNP calling.) The "-e" option should be set to 4 to note were using "random" probe sequences, not exons or other known genomic regions. Note we're again using a script (3-FindingTargetsV8) from the "Phylogenomics" wrapper package, with the "combineExon" sub.
+After generating your assemblies, it's time to determine which represent "on target" (or captured) loci in each sample. If you have both modern and historic samples (e.g., from museum specimens or other "ancient" DNA source), you'll want to run this step separately for each, as flanking regions to probe sequences will be merged to extend the pseudo-reference genome and only modern samples (presumably contaminant free) should be included. 
+
+* The "-p" flag selects a clustering threshhold -- we reccomend 0.95
+* The -b" flag should be set to 1 to merge modern DNA assemblies into probe sequences to extend the pseudo-reference genome. (We'll use this downstream for SNP calling.) 
+* The "-e" option should be set to 4 to note were using "random" probe sequences, not exons or other known genomic regions. Note we're again using a script (3-FindingTargetsV8) from the "Phylogenomics" wrapper package, with the "combineExon" sub.
 
 ```{sh}
 cd assemblies
@@ -177,7 +181,12 @@ Within this html, identify contigs with their first / only alignment to non-vert
 
 ## Alignment
 
-Now that you are reasonably sure your pseudo-reference genome is free of contamination and repetitive regions, it's time to align your cleaned reads against it for allele phasing and SNP calling with QB3's 5-Alignment wrapper script. You'll need to do this for each folder of samples, e.g., both modern and ancient DNA. For this step, you'll need both [Picard Tools](https://broadinstitute.github.io/picard/) and the [GATK](https://software.broadinstitute.org/gatk/) installed in your bin, as well as [NovoAlign](http://www.novocraft.com/products/novoalign/). There are also several flags that must be set to your unique specifications: "-i" indicates average insert size, "-v" indicates the standard deviation of insert size, "-t" indicates maximum alignment score (should be 90 for pop gen studies), "-p" indicates number of threads to call, and "-P" and "-G" are paths to the Picard and GATK executables, respectively. 
+Now that you are reasonably sure your pseudo-reference genome is free of contamination and repetitive regions, it's time to align your cleaned reads against it for allele phasing and SNP calling with QB3's 5-Alignment wrapper script. You'll need to do this for each folder of samples, e.g., both modern and ancient DNA. For this step, you'll need both [Picard Tools](https://broadinstitute.github.io/picard/) and the [GATK](https://software.broadinstitute.org/gatk/) installed in your bin, as well as [NovoAlign](http://www.novocraft.com/products/novoalign/). There are also several flags that must be set to your unique specifications: 
+* "-i" indicates average insert size 
+* "-v" indicates the standard deviation of insert size 
+* "-t" indicates maximum alignment score (should be 90 for pop gen studies) 
+* "-p" indicates number of threads to call
+* "-P" and "-G" are paths to the Picard and GATK executables, respectively. 
 
 ```{sh}
 mkdir /home/user/bin/alignment/
@@ -265,9 +274,26 @@ vcftools --vcf raw_reference.vcf --not-chr combined_Contig2441 --not-chr combine
 vcftools --vcf raw_ancient.vcf --not-chr combined_Contig2441 --not-chr combined_Contig70086 --remove-indels --recode --recode-INFO-all --out ancient_nocontam
 ```
 
-We can then use QB3's SNPcleaner script to perform several additional filtering steps. These include: 1) removing contigs that show extremely low or high coverage based on the empirical coverage distribution across all contigs; 2) removing contigs with at least one SNP having allele frequencies highly deviating from Hardy–Weinberg equilibrium expectations; 3) removing sites with excessively low or high coverage based on the empirical coverage distribution; 4) removing sites having allele frequencies highly deviating from Hardy–Weinberg equilibrium expectations; 5) removing sites with biases associated with reference and alternative allele Phred quality, mapping quality and distance of alleles from the ends of reads, and removing sites that show a bias towards SNPs coming from the forward or reverse strand; 6) removing sites for which there are not at least M of the individuals sequenced at N coverage each; 7) removing sites with a root mean square (RMS) mapping quality for SNPs across all samples below a certain threshold; and 8) removing C to T and G to A SNPs from the dataset if working with ancient DNA with a high level of deamination / base misincorporation.
+We can then use QB3's SNPcleaner script to perform several additional filtering steps. These include:
 
-As always, you'll want to tweak these commands for your specific needs. The "-M" flag here indicates which mutations to remove (C to T and G to A for our purposes, which is indicated CT_GA). The "-d" flag indicates minimum site depth; the "-k" flag indicates the minimum number of individuals to include with less that "-u" converage; "-a" indicates the minimum number of alternate alleles. You need to provide your contaminant-free .vcf file with "-v"; indicate an (optional) file to log dropped sites with "-p"; input your "All_contigs.bed" generated above with "-X"; and indicate a name for cleaned .bed file for each sample folder with "-B." 
+1. Removing contigs that show extremely low or high coverage based on the empirical coverage distribution across all contigs
+2. Removing contigs with at least one SNP having allele frequencies highly deviating from Hardy–Weinberg equilibrium expectations 
+3. Removing sites with excessively low or high coverage based on the empirical coverage distribution
+4. Removing sites having allele frequencies highly deviating from Hardy–Weinberg equilibrium expectations
+5. Removing sites with biases associated with reference and alternative allele Phred quality, mapping quality and distance of alleles from the ends of reads, and removing sites that show a bias towards SNPs coming from the forward or reverse strand
+6. Removing sites for which there are not at least M of the individuals sequenced at N coverage each
+7. Removing sites with a root mean square (RMS) mapping quality for SNPs across all samples below a certain threshold
+8. Removing C to T and G to A SNPs from the dataset if working with ancient DNA with a high level of deamination / base misincorporation.
+
+As always, you'll want to tweak these commands for your specific needs. 
+* The "-M" flag here indicates which mutations to remove (C to T and G to A for our purposes, which is indicated CT_GA). 
+* The "-d" flag indicates minimum site depth
+* The "-k" flag indicates the minimum number of individuals to include with less that "-u" converage
+* The "-a" flag  indicates the minimum number of alternate alleles.
+* The "-v" glag indicates your contaminant free .vcf; 
+* The "-p" flag indicates an (optional) file to log dropped sites with "-p";
+* The "-X" flag inputs your "All_contigs.bed" file 
+* The "-B" flag indicates a name for the cleaned .bed file for each sample type.
 
 ```{sh}
 perl 10-SNPcleaner.pl -A /home/user/project/assemblies/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -M CT_GA -d 5 -k 7 -u 3 -a 0 -r /home/user/project/SNPs/reference/reference_gene_depth_percentile.txt -B samples_reference.bed  -p dropped_reference -X All_contigs.bed -v /home/user/project/SNPs/reference/reference_nocontam.vcf > reference_cleaned.vcf
@@ -295,7 +321,21 @@ angsd sites index shared_sites.keep
 
 ## SNP calling
 
-Your data should now be ready for SNP calling. As mentioned above, we'll be using ANGSD, which is well-suited to low-coverage sequence data as it calls SNPs and estimates allele frequencies using an empirical Bayesian framework. We recommend reading the program's extensive documentation [here](http://www.popgen.dk/angsd/index.php/ANGSD). A quick-start guide follows. First, you'll need a list of the full paths of the .bam files of all samples you plan on including in your SNP calling in a text file (one path per line), named "bam.filelist.txt", indicated with the flag "-bam." You'll also need your .keep file ("-sites"), and an "ancestral" sequence (use your pseudo-reference genome if you don't have one). The "-minQ" flag sets a minimum acceptable Phred-scaled base quality; "-fold 1" makes the program estimate the folded site frequency spectrum and then uses your supplied reference as ancestral the ancestral sequence; "-out" indicates outfile prefixes; "-doGeno" selects a format for writing genotypes from ANGSD's list of options (see documentation for details; "2" will work for downstream adegent analyses); "-doPost 1" indicates the posterior genotype probability will be estimated with allele frequency as a prior; "-postCutoff" uses only genotypes with a posterior probability above the given value; "-SNP_pval" sets the P-value for a site being variable required to call a SNP; "-doCounts 1" calculates the frequency of different bases; "-genoMinDepth" indicates the minimum per site depth; "-doMajorMinor" infers the major and minor alleles "-doMaf 1" calculates minor allele frequency, while "-minMaf" selects a minumum minor allele frequency; "-doSaf" will calculate the likelihood of the sample allele frequency for each site and dump these into a ".saf" file; and "-minInd" sets the minimum number of individuals a site must be present in to be called as a SNP.  
+Your data should now be ready for SNP calling. As mentioned above, we'll be using ANGSD, which is well-suited to low-coverage sequence data as it calls SNPs and estimates allele frequencies using an empirical Bayesian framework. We recommend reading the program's extensive documentation [here](http://www.popgen.dk/angsd/index.php/ANGSD). A quick-start guide follows. 
+* You'll need a list of the full paths of the .bam files of all samples you plan on including in your SNP calling in a text file (one path per line), named "bam.filelist.txt", indicated with the flag "-bam." 
+* You'll also need your .keep file ("-sites"), and an "ancestral" sequence (use your pseudo-reference genome if you don't have one). 
+* The "-minQ" flag sets a minimum acceptable Phred-scaled base quality 
+* "-fold 1" makes the program estimate the folded site frequency spectrum and then uses your supplied reference as ancestral the ancestral sequence
+* "-out" indicates outfile prefixes
+* "-doGeno" selects a format for writing genotypes from ANGSD's list of options (see documentation for details; "2" will work for downstream adegent analyses)
+* "-doPost 1" indicates the posterior genotype probability will be estimated with allele frequency as a prior
+* "-postCutoff" uses only genotypes with a posterior probability above the given value
+* "-SNP_pval" sets the P-value for a site being variable required to call a SNP
+* "-doCounts 1" calculates the frequency of different bases
+* "-genoMinDepth" indicates the minimum per site depth
+* "-doMajorMinor" infers the major and minor alleles "-doMaf 1" calculates minor allele frequency, while "-minMaf" selects a minumum minor allele frequency
+* "-doSaf" will calculate the likelihood of the sample allele frequency for each site and dump these into a ".saf" file
+* "-minInd" sets the minimum number of individuals a site must be present in to be called as a SNP.  
 
 ```{sh}
 angsd -bam /home/user/project/SNPs/bam.filelist.txt -sites /home/user/project/SNPs/shared_sites.keep -anc /home/user/project/assemblies/reference/In_target/Final/combined_targetedRegionAndFlanking.fasta -minQ 20 -fold 1 -out snps_cleaned -GL 1 -doGeno 2  -doPost 1  -postCutoff 0.95 -doCounts 1 -geno_minDepth 6 -SNP_pval 0.05 -minMaf 0.05 -doMaf 2 -doMajorMinor 1 -doSaf 1 -minInd 10
