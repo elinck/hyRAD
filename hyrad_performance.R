@@ -5,7 +5,7 @@ library(ggplot2);library(ggpmisc);library(plyr);library(dplyr);library(reshape2)
 ### analyses exploring hyRAD's sequencing / assembly performance by various input DNA variables
 
 #read in assembly performance data, subset by extract type
-data <- read.csv("./data/syma_torotoro_hyRAD_performance.csv")
+data <- read.csv("syma_torotoro_hyRAD_performance.csv")
 modern <- subset(data, extract_type=="modern")
 historic <- subset(data, extract_type=="historic")
 
@@ -20,9 +20,9 @@ mnc <- ddply(data, c("extract_type"), summarise,
              mean = mean(num_loci_on_target),
              sd = sd(num_loci_on_target)
 )
-mspec <- ddply(data, c("extract_type"), summarise,
-               mean = mean(specificity_extended_ref),
-               sd = sd(specificity_extended_ref)
+mcov <- ddply(data, c("extract_type"), summarise,
+               mean = mean(eval_coverage),
+               sd = sd(eval_coverage)
 )
 mmean <- ddply(data, c("extract_type"), summarise,
                mean = mean(mean),
@@ -31,6 +31,18 @@ mmean <- ddply(data, c("extract_type"), summarise,
 mgc <- ddply(data, c("extract_type"), summarise,
              mean = mean(percent_gc_extended_ref),
              sd = sd(percent_gc_extended_ref)
+)
+msp <- ddply(data, c("extract_type"), summarise,
+             mean = mean(specificity),
+             sd = sd(specificity)
+)
+msen <- ddply(data, c("extract_type"), summarise,
+           mean = mean(sensitivity),
+           sd = sd(sensitivity)
+)
+menr <- ddply(data, c("extract_type"), summarise,
+          mean = mean(enrichment),
+          sd = sd(enrichment)
 )
 
 #generate plots for means / sds
@@ -55,13 +67,13 @@ p2 <- ggplot(mnc, aes(x = factor(extract_type), y = mean)) +
   theme(axis.title.y = element_text(size=12)) +
   theme(axis.text.x = element_blank())
 
-p3 <- ggplot(mspec, aes(x = factor(extract_type), y = mean)) + 
+p3 <- ggplot(mcov, aes(x = factor(extract_type), y = mean)) + 
   geom_bar(position=position_dodge(), width=0.5, stat="identity", aes(fill = factor(extract_type))) +
-  coord_cartesian(ylim=c(0.45,0.6)) +
+  coord_cartesian(ylim=c(0,16)) +
   guides(fill=guide_legend(title=NULL)) +
   geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.1) +
   xlab("") +
-  ylab("Mean percent mapped reads") +
+  ylab("Mean coverage") +
   theme(axis.title.y = element_text(size=12)) +
   theme(axis.text.x = element_blank())
 
@@ -84,10 +96,40 @@ p5 <- ggplot(mgc, aes(x = factor(extract_type), y = mean)) +
   theme(axis.title.y = element_text(size=12)) +
   theme(axis.text.x = element_blank())
 
+p6 <- ggplot(msp, aes(x = factor(extract_type), y = mean)) + 
+  geom_bar(position=position_dodge(), width=0.5, stat="identity", aes(fill = factor(extract_type))) +
+  coord_cartesian(ylim=c(0,25)) +
+  guides(fill=guide_legend(title=NULL)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.1) + 
+  xlab("") +
+  ylab("Mean specificity") +
+  theme(axis.title.y = element_text(size=12)) +
+  theme(axis.text.x = element_blank())
+
+p7 <- ggplot(msen, aes(x = factor(extract_type), y = mean)) + 
+  geom_bar(position=position_dodge(), width=0.5, stat="identity", aes(fill = factor(extract_type))) +
+  coord_cartesian(ylim=c(0,100)) +
+  guides(fill=guide_legend(title=NULL)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.1) + 
+  xlab("") +
+  ylab("Mean sensitivity") +
+  theme(axis.title.y = element_text(size=12)) +
+  theme(axis.text.x = element_blank())
+
+p8 <- ggplot(menr, aes(x = factor(extract_type), y = mean)) + 
+  geom_bar(position=position_dodge(), width=0.5, stat="identity", aes(fill = factor(extract_type))) +
+  coord_cartesian(ylim=c(0,20)) +
+  guides(fill=guide_legend(title=NULL)) +
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.1) + 
+  xlab("") +
+  ylab("Mean fold enrichment") +
+  theme(axis.title.y = element_text(size=12)) +
+  theme(axis.text.x = element_blank())
+
 #load grid / shared legend function
 grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, position = c("bottom", "right")) {
   
-  plots <- list(p1,p2,p3,p4,p5)
+  plots <- list(p1,p4,p5,p2,p3,p6,p7,p8)
   position <- match.arg(position)
   g <- ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
   legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
@@ -111,7 +153,7 @@ grid_arrange_shared_legend <- function(..., ncol = length(list(...)), nrow = 1, 
 }
 
 # plot all together w/ shared legend
-grid_arrange_shared_legend(p1,p2,p3,p4,p5)
+grid_arrange_shared_legend(ncol=4,nrow=2,p1,p4,p5,p2,p3,p6,p7,p8)
 
 ### test for significant differences between historic / modern samples ###
 
@@ -125,6 +167,10 @@ t.test(historic$specificity_extended_ref, modern$specificity_extended_ref)
 t.test(historic$mean, modern$mean)
 t.test(historic$percent_gc_extended_ref, modern$percent_gc_extended_ref)
 t.test(historic$missing_snps, modern$missing_snps)
+t.test(historic$specificity, modern$specificity)
+t.test(historic$sensitivity, modern$sensitivity)
+t.test(historic$enrichment, modern$enrichment)
+t.test(historic$eval_coverage, modern$eval_coverage)
 
 ### explore relationship between num_loci and multiple variables ###
 
@@ -188,6 +234,38 @@ summary(hgc2)
 
 hgc3 <- lm(percent_gc_extended_ref ~ input_quantity, historic)
 summary(hgc3)
+
+#historical samples, specificity
+hsp1 <- lm(specificity ~ age + input_quantity + read_count_preclean, historic)
+summary(hgc1)
+
+hsp2 <- lm(specificity ~ age + input_quantity, historic)
+summary(hgc2)
+
+hsp3 <- lm(specificity ~ input_quantity, historic)
+summary(hgc3) # significant, p=0.0161
+
+#historical samples, sensitivity
+
+hse1 <- lm(sensitivity ~ age + input_quantity + read_count_preclean, historic)
+summary(hse1)
+
+hse2 <- lm(specificity ~ age + read_count_preclean, historic)
+summary(hse2)
+
+hse3 <- lm(specificity ~ age, historic)
+summary(hse3) #not significant
+
+#historical samples, enrichment
+
+hen1 <- lm(enrichment ~ age + input_quantity + read_count_preclean, historic)
+summary(hen1)
+
+hen2 <- lm(enrichment ~ age + read_count_preclean, historic)
+summary(hen2)
+
+hen3 <- lm(enrichment ~ age, historic)
+summary(hen3)
 
 # plot sig. relationship between concentration, gc content in pseudo ref genome
 p7 <- ggplot(historic, aes(x=input_quantity, color=extract_type, y=percent_gc_extended_ref)) + 

@@ -11,8 +11,29 @@ cutcontigs <- function(data,contigs,output){
     grep(pattern, data)
   }))
   toGrab <- sort(c(matchingLines, matchingLines + 1))
-  write(data[-toGrab], "output.fa")
+  write(data[-toGrab], file=paste(output,".fasta",sep=""))
 }
+
+setwd("/Users/ethanlinck/Dropbox/Syma/hyRAD/")
+data <- readLines("combined_targetedRegionAndFlanking.fasta")
+contigs <- readLines("contam_contigs.txt")
+  
+cutcontigsbatch <- function(contigs){
+  files <- list.files(".fasta")
+  for(i in 1:length(files)) {
+    lst[[i]] <- read.csv(files[i])
+  }
+  lapply(lst, function(x) {
+    matchingLines <- unlist(lapply(contigs, function(x) {
+      pattern <- paste0("^>.*", x)
+      grep(pattern, data)
+    }))
+    toGrab <- sort(c(matchingLines, matchingLines + 1))
+    write(data[-toGrab], "output.fa")
+  })
+}
+
+
 
 
 

@@ -1,4 +1,4 @@
-#setwd("/Users/ethanlinck/Dropbox/Syma/hyRAD")
+setwd("/Users/ethanlinck/Dropbox/Syma/hyRAD/data")
 #install.packages("data.table");install.packages("ggplot2");install.packages("adegenet");install.packages("StAMPP");install.packages("data.table");install.packages("ggmap");install.packages("mapdata")
 library(ggplot2);library(adegenet);library(reshape2);library(StAMPP);library(data.table);library(pegas);library(plyr);library(RColorBrewer);library(ggmap);library(mapdata);library(maps)
 source("/Users/ethanlinck/Dropbox/Syma/hyRAD/dapcplot.R")
@@ -58,54 +58,69 @@ pc2 <- pcas[,2]
 pc3 <- pcas[,3]
 
 #variables input by hand because I'm lazy -- will clean up
-gc <- c(44.84,49.22,49.21,45.55,49.42,48.43,45.99,48.8,45.49,52.11,47.69,48.58,49.32,47.61,51.46,50.87,49.75,51.65,55.08)
-age <- c(13,13,5,14,5,13,88,82,120,103,105,88,116,116,119,139,117,88,88)
-conc <- c(71.6,51.8,37,31.8,43,10.1,10.2,1.49,0.584,3.66,3.84,0.714,2.54,0.846,1.07,1.84,7.36,0.124,0.15)
+data <- read.csv("syma_torotoro_hyRAD_performance.csv")
+sensitivity <- data$sensitivity
+specificity <- data$specificity
+enrichment <- data$enrichment
 
 #linear models to test significance of correlations
-pca_lm <- lm(pc1 ~ gc)
-summary(pca_lm)
-pca_lm2 <- lm(pc2 ~ gc)
-summary(pca_lm2)
-pca_lm3 <- lm(pc3 ~ gc)
-summary(pca_lm3)
-pca_lm4 <- lm(pc1 ~ age)
-summary(pca_lm4)
-pca_lm5 <- lm(pc2 ~ age)
-summary(pca_lm5)
-pca_lm6 <- lm(pc3 ~ age)
-summary(pca_lm6)
-pca_lm7 <- lm(pc1 ~ conc)
-summary(pca_lm7)
-pca_lm8 <- lm(pc2 ~ conc)
-summary(pca_lm8)
-pca_lm9 <- lm(pc3 ~ conc)
-summary(pca_lm9)
+pca_lm <- lm(pc1 ~ sensitivity)
+summary(pca_lm) #significant, p=7.11e-09
+pca_lm2 <- lm(pc2 ~ sensitivity)
+summary(pca_lm2) 
+pca_lm3 <- lm(pc3 ~ sensitivity)
+summary(pca_lm3) 
+pca_lm4 <- lm(pc1 ~ specificity)
+summary(pca_lm4) #significant, p=7.11e-09
+pca_lm5 <- lm(pc2 ~ specificity)
+summary(pca_lm5) 
+pca_lm6 <- lm(pc3 ~ specificity)
+summary(pca_lm6) 
+pca_lm7 <- lm(pc1 ~ enrichment)
+summary(pca_lm7) #significant, 7.74e-08 ***
+pca_lm8 <- lm(pc2 ~ enrichment)
+summary(pca_lm8) 
+pca_lm9 <- lm(pc3 ~ enrichment)
+summary(pca_lm9) 
+pca_lm10 <- lm(pc1 ~ age)
+summary(pca_lm10) #significant, 5.55e-09 ***
+pca_lm11 <- lm(pc2 ~ age)
+summary(pca_lm11)
+pca_lm12 <- lm(pc3 ~ age)
+summary(pca_lm12)
+pca_lm13 <- lm(pc1 ~ conc)
+summary(pca_lm13) #significant, 2.43e-05 ***
+pca_lm14 <- lm(pc2 ~ conc)
+summary(pca_lm14)
+pca_lm15 <- lm(pc3 ~ conc)
+summary(pca_lm15)
 
 # plot GC by pca 1
-p1 <- ggplot(data, aes(x=gc, y=pc1)) + 
-  guides(color=FALSE) +
-  geom_point() + 
-  xlab("%gc") +
-  ylab("pca 1 score") +
-  theme(axis.title.y = element_text(size=16)) +
-  theme(axis.title.x = element_text(size=16)) +
-  stat_smooth(method="lm", fullrange=TRUE, alpha=0.1) 
+# not run for ms
+#p1 <- ggplot(data, aes(x=gc, y=pc1)) + 
+#  guides(color=FALSE) +
+#  geom_point() + 
+#  xlab("%gc") +
+#  ylab("pca 1 score") +
+#  theme(axis.title.y = element_text(size=16)) +
+#  theme(axis.title.x = element_text(size=16)) +
+#  stat_smooth(method="lm", fullrange=TRUE, alpha=0.1) 
 
 # plot GC across individuals (for figure)
-names <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
-gc <- c(44.84,49.22,49.21,45.55,49.42,48.43,45.49,47.61,51.46,45.99,48.8,52.11,47.69,48.58,49.32,50.87,49.75,51.65,55.08)
-data2 <- as.data.frame(cbind(gc,names))
+# not run for ms
+# names <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
+# gc <- c(44.84,49.22,49.21,45.55,49.42,48.43,45.49,47.61,51.46,45.99,48.8,52.11,47.69,48.58,49.32,50.87,49.75,51.65,55.08)
+# data2 <- as.data.frame(cbind(gc,names))
 
 # plot 
-p2 <- ggplot(data2, aes(x=names, y=gc, group=1)) + 
-  guides(color=FALSE) +
-  geom_line() +
-  geom_point() + 
-  xlab("") +
-  ylab("%GC Content") +
-  theme(axis.title.y = element_text(size=14)) +
-  theme(axis.title.x = element_text(size=14))
+# p2 <- ggplot(data2, aes(x=names, y=gc, group=1)) + 
+#   guides(color=FALSE) +
+#  geom_line() +
+#  geom_point() + 
+#  xlab("") +
+#  ylab("%GC Content") +
+#  theme(axis.title.y = element_text(size=14)) +
+#  theme(axis.title.x = element_text(size=14))
 
 ###dapc w/max #PC's, then test for opt # to keep w/alpha scores
 temp_a <- dapc(torotoro_a, n.pca=6, n.da=6)
