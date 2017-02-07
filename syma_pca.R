@@ -222,6 +222,39 @@ ggplot() + coord_map()+
   ylab("Latitude") +
   guides(fill=guide_legend(title=NULL))
 
+
+pg <- c(1,1,2,1,3,3,1,3,3,5,6,6,3,6,7,6,6,3,6)
+
+#map mtDNA
+localities4 <- cbind(localities,pg)
+map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
+ggplot() + coord_map()+
+  geom_path(data=map, aes(x=long, y=lat, group=group)) +
+  geom_point(data=localities2, size=5, aes(x=long, y=lat, col=as.factor(pg))) +
+  scale_colour_manual(values = set,name="DAPC Cluster") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  guides(fill=guide_legend(title=NULL))
+
+pg <- c(1,1,2,1,3,3,1,3,3,5,6,6,3,6,7,6,6,3,6)
+ph <- c(1,1,1,1,3,3,1,1,1,5,3,3,3,3,7,3,3,3,3)
+
+
+#map nuDNA
+localities5 <- cbind(localities,ph)
+map <- map_data("worldHires", xlim=c(130,154), ylim=c(-10,1))
+ggplot() + coord_map()+
+  geom_path(data=map, aes(x=long, y=lat, group=group)) +
+  geom_point(data=localities2, size=5, aes(x=long, y=lat, col=as.factor(ph))) +
+  scale_colour_manual(values = set,name="DAPC Cluster") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  guides(fill=guide_legend(title=NULL))
+
 ### mantel test for IBD
 z <- read.delim("snps_cleaned_complete_maf05_adg", sep="\t")
 torotoro_z <- df2genind(z, NA.char="NA", ploidy=2, ncode=2)

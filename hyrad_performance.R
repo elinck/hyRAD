@@ -1,11 +1,11 @@
-#setwd("~/Dropbox/Syma/hyRAD/")
+setwd("~/Dropbox/Syma/hyRAD/")
 #install.packages("gridExtra"); install.packages("grid");install.packages("ggpmisc");install.packages("lme4");install.packages("AICcmodavg")
 library(ggplot2);library(ggpmisc);library(plyr);library(dplyr);library(reshape2);library(gridExtra);library(grid);library(lme4);library(AICcmodavg)
 
 ### analyses exploring hyRAD's sequencing / assembly performance by various input DNA variables
 
 #read in assembly performance data, subset by extract type
-data <- read.csv("syma_torotoro_hyRAD_performance.csv")
+data <- read.csv("./data/syma_torotoro_hyRAD_performance.csv")
 modern <- subset(data, extract_type=="modern")
 historic <- subset(data, extract_type=="historic")
 
